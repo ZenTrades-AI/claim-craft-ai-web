@@ -195,9 +195,9 @@ const Dashboard = () => {
     toast.success("Call data updated successfully");
   }, []);
 
-  // Wrapper function for manual refresh that shows toast
-  const handleManualRefresh = useCallback(() => {
-    fetchCalls(true);
+  // Wrapper function for manual refresh that shows toast and returns Promise
+  const handleManualRefresh = useCallback(async () => {
+    await fetchCalls(true);
   }, [fetchCalls]);
 
   if (loading && !initialDataLoaded) {
