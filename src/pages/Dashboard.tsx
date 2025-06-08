@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import DashboardTab from "@/components/DashboardTab";
 import CallLogsTab from "@/components/CallLogsTab";
@@ -50,7 +49,7 @@ const Dashboard = () => {
   const { agentId, isAuthenticated } = useAuth();
 
   // Create a fetchCalls function that can be used for initial load and refreshes
-  const fetchCalls = useCallback(async () => {
+  const fetchCalls = useCallback(async (showToast = false) => {
     if (!agentId) {
       setLoading(false);
       return;
@@ -104,6 +103,11 @@ const Dashboard = () => {
       
       setCalls(mergedCalls);
       setInitialDataLoaded(true);
+      
+      // Show success message only when manually refreshing
+      if (showToast) {
+        toast.success(`Refreshed successfully! ${mergedCalls.length} calls loaded`);
+      }
       
       // Process transcripts with OpenAI in the background - only for unprocessed calls
       // Use setTimeout to avoid blocking the UI thread
@@ -175,7 +179,7 @@ const Dashboard = () => {
   // Load initial data when dashboard mounts and we have an agentId
   useEffect(() => {
     if (agentId && isAuthenticated) {
-      fetchCalls();
+      fetchCalls(false);
     }
   }, [agentId, isAuthenticated, fetchCalls]);
 
@@ -190,6 +194,11 @@ const Dashboard = () => {
     // Show a feedback toast
     toast.success("Call data updated successfully");
   }, []);
+
+  // Wrapper function for manual refresh that shows toast
+  const handleManualRefresh = useCallback(() => {
+    fetchCalls(true);
+  }, [fetchCalls]);
 
   if (loading && !initialDataLoaded) {
     return (
@@ -210,7 +219,7 @@ const Dashboard = () => {
             initialCalls={calls} 
             initialLoading={loading} 
             dataLoaded={initialDataLoaded}
-            refreshCalls={fetchCalls}
+            refreshCalls={handleManualRefresh}
             updateCall={updateCall}
           />
         }
@@ -219,7 +228,7 @@ const Dashboard = () => {
             initialCalls={calls} 
             initialLoading={loading} 
             dataLoaded={initialDataLoaded}
-            refreshCalls={fetchCalls}
+            refreshCalls={handleManualRefresh}
             updateCall={updateCall}
           />
         }
@@ -228,7 +237,7 @@ const Dashboard = () => {
             initialCalls={calls} 
             initialLoading={loading} 
             dataLoaded={initialDataLoaded}
-            refreshCalls={fetchCalls}
+            refreshCalls={handleManualRefresh}
             updateCall={updateCall}
           />
         }
@@ -237,7 +246,7 @@ const Dashboard = () => {
             initialCalls={calls} 
             initialLoading={loading} 
             dataLoaded={initialDataLoaded}
-            refreshCalls={fetchCalls}
+            refreshCalls={handleManualRefresh}
             updateCall={updateCall}
           />
         }

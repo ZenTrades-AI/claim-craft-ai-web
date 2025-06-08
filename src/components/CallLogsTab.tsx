@@ -582,7 +582,25 @@ const CallLogsTab = ({
       toast.error("Failed to update appointment status");
     }
   };
-  
+
+  // New function for quick accept from table
+  const handleQuickAccept = async (call: any, event: React.MouseEvent) => {
+    event.stopPropagation();
+    
+    if (!call.appointment_date || !call.appointment_time) {
+      toast.error("No appointment details to accept");
+      return;
+    }
+    
+    await handleAcceptAppointment(call.appointment_date, call.appointment_time, call.call_id);
+  };
+
+  // New function for quick reject from table
+  const handleQuickReject = async (call: any, event: React.MouseEvent) => {
+    event.stopPropagation();
+    await handleRejectAppointment(call.call_id);
+  };
+
   // Extract appointment details manually
   const extractAppointmentFromTranscript = async (call: any) => {
     if (!call.transcript) {
@@ -901,24 +919,50 @@ const CallLogsTab = ({
                       {call.client_address || <span className="text-gray-400">Not available</span>}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-1">
+                        {call.appointment_date && call.appointment_time && call.appointment_status === 'in-process' && (
+                          <>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                              onClick={(e) => handleQuickAccept(call, e)}
+                              title="Accept appointment"
+                            >
+                              <Check className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={(e) => handleQuickReject(call, e)}
+                              title="Reject appointment"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </>
+                        )}
                         <Button 
                           variant="ghost" 
                           size="sm" 
+                          className="h-7 w-7 p-0"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEditClick(call);
                           }}
+                          title="Edit call"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="sm" 
+                          className="h-7 w-7 p-0"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRowClick(call);
                           }}
+                          title="View details"
                         >
                           <Info className="h-4 w-4" />
                         </Button>

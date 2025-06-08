@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,12 +10,19 @@ import {
 } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { Loader2, CalendarCheck, CalendarClock } from "lucide-react";
+import { Loader2, CalendarCheck, CalendarClock, Calendar as CalendarIcon, Clock, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -25,20 +31,21 @@ interface CalendarTabProps {
   initialCalls?: any[];
   initialLoading?: boolean;
   dataLoaded?: boolean;
-  refreshCalls?: () => Promise<void>;  // Added this prop
-  updateCall?: (updatedCall: any) => void; // Optional prop for consistency
+  refreshCalls?: () => Promise<void>;
+  updateCall?: (updatedCall: any) => void;
 }
 
 const CalendarTab = ({
   initialCalls = [],
   initialLoading = false,
   dataLoaded = false,
-  refreshCalls, // Added this prop
+  refreshCalls,
 }: CalendarTabProps) => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(initialLoading);
   const [calendarConnected, setCalendarConnected] = useState(false);
+  const [showComingSoonDialog, setShowComingSoonDialog] = useState(false);
   const { agentId } = useAuth();
 
   // Get all appointments to display as events
@@ -124,13 +131,7 @@ const CalendarTab = ({
   };
 
   const connectGoogleCalendar = () => {
-    // In a real implementation, this would use the Google Calendar API OAuth flow
-    toast.info("Google Calendar connection feature is in development");
-    // For demonstration, simulate a successful connection
-    setTimeout(() => {
-      setCalendarConnected(true);
-      toast.success("Google Calendar connected successfully!");
-    }, 1500);
+    setShowComingSoonDialog(true);
   };
 
   const selectedDateEvents = getEventsForDate(date);
@@ -139,7 +140,10 @@ const CalendarTab = ({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Calendar</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <CalendarIcon className="h-5 w-5" />
+            Calendar Integration
+          </CardTitle>
           <CardDescription>
             View and manage your appointments in calendar view
           </CardDescription>
@@ -147,97 +151,142 @@ const CalendarTab = ({
         <CardContent>
           <Tabs defaultValue="month" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="month">Month View</TabsTrigger>
-              <TabsTrigger value="day">Day View</TabsTrigger>
+              <TabsTrigger 
+                value="month" 
+                onClick={() => setShowComingSoonDialog(true)}
+              >
+                Month View
+              </TabsTrigger>
+              <TabsTrigger 
+                value="day"
+                onClick={() => setShowComingSoonDialog(true)}
+              >
+                Day View
+              </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="month" className="flex flex-col md:flex-row gap-6">
-              <div className="md:w-1/2">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  className="rounded-md border shadow-sm"
-                />
-              </div>
-              
-              <div className="md:w-1/2">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">
-                      {date ? date.toLocaleDateString('en-US', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      }) : 'Select a date'}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoading ? (
-                      <div className="flex items-center justify-center h-40">
-                        <Loader2 className="h-6 w-6 animate-spin text-purple-500" />
-                      </div>
-                    ) : selectedDateEvents.length > 0 ? (
-                      <div className="space-y-3">
-                        {selectedDateEvents.map(event => (
-                          <div key={event.id} className="p-3 rounded-md border">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-medium">{event.title}</h4>
-                                <p className="text-sm text-gray-500">{event.time}</p>
-                              </div>
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                event.status === "completed" ? "bg-green-100 text-green-800" :
-                                event.status === "in-process" ? "bg-blue-100 text-blue-800" :
-                                event.status === "rejected" ? "bg-red-100 text-red-800" :
-                                "bg-yellow-100 text-yellow-800"
-                              }`}>
-                                {event.status}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center h-40 text-center">
-                        <CalendarClock className="h-10 w-10 text-gray-300 mb-2" />
-                        <p className="text-gray-500">No appointments scheduled for this date</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+            <TabsContent value="month" className="flex flex-col items-center justify-center py-12">
+              <div className="text-center max-w-md">
+                <CalendarCheck className="h-16 w-16 text-purple-500 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                  Calendar Integration Coming Soon
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  We're working on bringing you a comprehensive calendar view with Google Calendar sync, 
+                  advanced scheduling features, and seamless appointment management.
+                </p>
+                <Button 
+                  onClick={() => setShowComingSoonDialog(true)}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  Learn More
+                </Button>
               </div>
             </TabsContent>
             
-            <TabsContent value="day">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center justify-center py-10">
-                    <CalendarCheck className="h-16 w-16 text-gray-300 mb-4" />
-                    <h3 className="text-xl font-medium text-gray-600">Day View Coming Soon</h3>
-                    <p className="text-gray-500 mt-2 text-center max-w-md">
-                      We're working on an enhanced day view with time slots and additional features.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+            <TabsContent value="day" className="flex flex-col items-center justify-center py-12">
+              <div className="text-center max-w-md">
+                <Clock className="h-16 w-16 text-purple-500 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                  Day View Coming Soon
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Enhanced day view with time slots, drag-and-drop scheduling, 
+                  and real-time updates is under development.
+                </p>
+                <Button 
+                  onClick={() => setShowComingSoonDialog(true)}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  Get Notified
+                </Button>
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>
         <CardFooter className="flex justify-between">
           <div className="text-sm text-gray-500">
-            {events.length} total appointments
+            {events.length} total appointments in your system
           </div>
           <Button 
             onClick={connectGoogleCalendar}
-            disabled={calendarConnected}
-            variant={calendarConnected ? "outline" : "default"}
+            variant="outline"
+            className="border-purple-200 text-purple-700 hover:bg-purple-50"
           >
-            {calendarConnected ? "Google Calendar Connected" : "Connect Google Calendar"}
+            Connect Google Calendar
           </Button>
         </CardFooter>
       </Card>
+
+      {/* Coming Soon Dialog */}
+      <Dialog open={showComingSoonDialog} onOpenChange={setShowComingSoonDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center">
+            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
+              <Star className="h-6 w-6 text-purple-600" />
+            </div>
+            <DialogTitle className="text-xl font-semibold">
+              Calendar Integration Coming Soon! 🚀
+            </DialogTitle>
+            <DialogDescription className="text-base mt-3">
+              We're building an amazing calendar experience that will include:
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-3 my-6">
+            <div className="flex items-start gap-3">
+              <div className="h-2 w-2 bg-purple-500 rounded-full mt-2"></div>
+              <div>
+                <p className="font-medium text-sm">Google Calendar Sync</p>
+                <p className="text-xs text-gray-600">Two-way sync with your existing calendar</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-3">
+              <div className="h-2 w-2 bg-purple-500 rounded-full mt-2"></div>
+              <div>
+                <p className="font-medium text-sm">Smart Scheduling</p>
+                <p className="text-xs text-gray-600">AI-powered appointment suggestions and conflict detection</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-3">
+              <div className="h-2 w-2 bg-purple-500 rounded-full mt-2"></div>
+              <div>
+                <p className="font-medium text-sm">Team Collaboration</p>
+                <p className="text-xs text-gray-600">Share calendars and coordinate with your team</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-3">
+              <div className="h-2 w-2 bg-purple-500 rounded-full mt-2"></div>
+              <div>
+                <p className="font-medium text-sm">Advanced Views</p>
+                <p className="text-xs text-gray-600">Day, week, month views with customizable layouts</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => setShowComingSoonDialog(false)}
+            >
+              Close
+            </Button>
+            <Button 
+              className="flex-1 bg-purple-600 hover:bg-purple-700"
+              onClick={() => {
+                toast.success("Thanks for your interest! We'll notify you when it's ready.");
+                setShowComingSoonDialog(false);
+              }}
+            >
+              Get Notified
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
