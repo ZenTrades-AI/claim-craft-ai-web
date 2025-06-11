@@ -27,7 +27,7 @@ const LisaLogo = ({ size = "md" }: LisaLogoProps) => {
         height={iconSizes[size].height}
       />
       <span className={`font-semibold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600 ${sizeClasses[size]}`}>
-        LISA AI
+        CLARA AI
       </span>
     </div>
   );
